@@ -183,6 +183,7 @@ IMAGES['bar'] = pygame.image.load(BAR[0]).convert_alpha()
 IMAGES['hammer'] = pygame.image.load(HAMMER[0]).convert_alpha()
 
 PLAYERWIDTH = IMAGES['playerl'][0].get_width()
+PLAYERHEIGHT = IMAGES['playerl'][0].get_height()
 
 class GameState:
     def __init__(self):
@@ -194,17 +195,15 @@ class GameState:
         self.hammer, self.bar = getRandomBar(100)
         self.hammers.append(self.hammer)
         self.bars.append(self.bar)
-        self.hammer, self.bar = getRandomBar(-250)
+        self.hammer, self.bar = getRandomBar(-200)
         self.hammers.append(self.hammer)
         self.bars.append(self.bar)
 
         self.craneVelY = 4
         self.playerVelX = 0
-        # player velocity, max velocity, downward accleration, accleration on flap
-        self.playerVelY = 1          # player's velocity along Y, default same as playerFlapped
         # playerMaxVelY = 10    # max vel along Y, max descend speed
         # playerMinVelY = -8    # min vel along Y, max ascend speed
-        self.playerAccX = 1          # players right accleration
+        self.playerAccX = 0.4          # players right accleration
 
     def frame_step(self, input_actions):
         pygame.event.pump()
@@ -221,17 +220,6 @@ class GameState:
             self.playerAccX = -self.playerAccX
         else:
             pass
-
-        # for event in pygame.event.get():
-        #     if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-        #         pygame.quit()
-        #         sys.exit()
-        #     if (event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP)):
-        #         # if self.playery > -2 * IMAGES['player'][0].get_height():
-        #         # self.playerVelY = playerFlapAcc
-        #         self.playerAccX = -self.playerAccX
-        #         # SOUNDS['wing'].play()
-
 
         if self.bars[0][0]['y'] - 1 < self.playery + IMAGES['playerl'][0].get_height()/2 < self.bars[0][0]['y'] + 3:
             self.score += 1
@@ -261,7 +249,7 @@ class GameState:
             self.hammers = self.hammers[1:]
 
         if 97 < self.bars[-1][0]['y'] < 101:
-            self.hammer, self.bar = getRandomBar(-250)
+            self.hammer, self.bar = getRandomBar(-200)
             self.hammers.append(self.hammer)
             self.bars.append(self.bar)
 
@@ -297,8 +285,8 @@ class GameState:
         # print self.score so player overlaps the self.score
         
         if isCrash:
-            terminal = True
             self.__init__()
+            terminal = True
             reward = -1
 
         # showScore(self.score)
@@ -308,7 +296,7 @@ class GameState:
 
         image_data = pygame.surfarray.array3d(pygame.display.get_surface())
         FPSCLOCK.tick(FPS)
-        return image_data[self.playerx:,:].copy(), reward, terminal
+        return image_data[:,:self.playery+PLAYERHEIGHT].copy(), reward, terminal
 
 def nextShm(ShmVals):
     """oscillates the value of messageShm['val'] between 8 and -8"""
@@ -324,7 +312,7 @@ def getRandomBar(y):
     """returns a randomly generated pipe"""
     # y of gap between upper and lower pipe
     x = random.randrange(SCREENWIDTH/10, SCREENWIDTH*2/5)
-    gapX = SCREENWIDTH * 0.4
+    gapX = SCREENWIDTH * 0.5
     barWidth = IMAGES['bar'].get_width()
     offset = random.randint(-180, 220)
     # t = 30*cos(2*3.14159*random.uniform(0, 30)/180)

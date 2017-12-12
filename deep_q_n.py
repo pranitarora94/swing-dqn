@@ -15,11 +15,11 @@ GAMMA = 0.99 # decay rate of past observations
 OBSERVE = 5000. # timesteps to observe before training
 EXPLORE = 100000. # frames over which to anneal epsilon
 FINAL_EPSILON = 0.001 # final value of epsilon
-INITIAL_EPSILON = 0.1 # starting value of epsilon
+INITIAL_EPSILON = 1 # starting value of epsilon
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 TERMINAL_BUFFER = 10 # number of terminal states to remember
 BATCH = 32 # size of minibatch
-FRAME_PER_ACTION = 1
+FRAME_PER_ACTION = 10
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev = 0.01)
@@ -123,13 +123,16 @@ def trainNetwork(s, readout, h_fc1, sess):
         a_t = np.zeros([ACTIONS])
         action_index = 0
 
-        if random.random() <= epsilon:
-            print("----------Random Action----------")
-            action_index = random.randrange(ACTIONS)
-            a_t[random.randrange(ACTIONS)] = 1
+        if t % FRAME_PER_ACTION == 0:
+            if random.random() <= epsilon:
+                print("----------Random Action----------")
+                action_index = random.randrange(ACTIONS)
+                a_t[random.randrange(ACTIONS)] = 1
+            else:
+                action_index = np.argmax(readout_t)
+                a_t[action_index] = 1
         else:
-            action_index = np.argmax(readout_t)
-            a_t[action_index] = 1
+            a_t[0] = 1
 
         # scale down epsilon
         if epsilon > FINAL_EPSILON and t > OBSERVE:
