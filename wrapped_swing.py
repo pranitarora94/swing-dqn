@@ -16,6 +16,8 @@ BASEY        = SCREENHEIGHT * 0.79
 # image, sound and hitmask  dicts
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
     # green bear
